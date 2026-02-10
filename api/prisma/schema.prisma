@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  twitchId          String    @unique
+  username          String
+  displayName       String?
+  profileImageUrl   String?
+  accessToken       String?   @db.Text
+  refreshToken      String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  hostedGames       GameSession[] @relation("hosted_games")
+  playerScores      PlayerScore[]
+  leaderboard       Leaderboard?
+  
+  @@index([twitchId])
+  @@map("users")
+}
+
+model GameSession {
+  id              Int         @id @default(autoincrement())
+  sessionCode     String      @unique
+  hostUserId      Int
+  gameState       Json        @default("{}")
+  maxPlayers      Int         @default(4)
+  currentPlayers  Int         @default(1)
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  
+  // Relations
+  host            User        @relation("hosted_games", fields: [hostUserId], references: [id])
+  playerScores    PlayerScore[]
+  
+  @@index([sessionCode])
+  @@index([hostUserId])
+  @@map("game_sessions")
+}
+
+model PlayerScore {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  gameSessionId   Int
+  score           Int         @default(0)
+  joinedAt        DateTime    @default(now())
+  
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  gameSession     GameSession @relation(fields: [gameSessionId], references: [id])
+  
+  @@unique([userId, gameSessionId])
+  @@index([userId])
+  @@index([gameSessionId])
+  @@map("player_scores")
+}
+
+model Leaderboard {
+  id              Int         @id @default(autoincrement())
+  userId          Int         @unique
+  totalScore      Int         @default(0)
+  gamesPlayed     Int         @default(0)
+  wins            Int         @default(0)
+  updatedAt       DateTime    @default(now()) @updatedAt
+  
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  
+  @@index([totalScore])
+  @@map("leaderboards")
+}

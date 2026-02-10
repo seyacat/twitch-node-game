@@ -1,0 +1,29 @@
+{
+  "name": "twitch-node-game",
+  "version": "1.0.0",
+  "description": "Multiplayer game platform with Twitch authentication and WebSocket real-time communication",
+  "private": true,
+  "workspaces": [
+    "api",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter api dev\" \"pnpm --filter frontend dev\"",
+    "build": "pnpm --filter api build && pnpm --filter frontend build",
+    "lint": "pnpm --filter api lint && pnpm --filter frontend lint",
+    "test": "pnpm --filter api test && pnpm --filter frontend test",
+    "clean": "rm -rf node_modules api/node_modules frontend/node_modules shared/node_modules",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
